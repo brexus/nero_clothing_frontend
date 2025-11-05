@@ -83,7 +83,7 @@ const CollectionPage = () => {
 
     return (
         <DefaultLayout>
-            <section className="flex flex-col items-center justify-center w-full">
+            <section className="flex flex-col items-center justify-start w-full">
                 <h1 className="text-2xl py-2">
                     {name ? name.toUpperCase() : ""}
                 </h1>

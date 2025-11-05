@@ -3,12 +3,12 @@ import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 import {Link} from "react-router";
 import {Icons} from "@/components/icons.tsx";
 import {LogoIcon} from "@/components/LogoIcon.tsx";
-import {ModeToggle} from "@/components/ModeToggle.tsx";
 import {useAuth} from "@/context/AuthContext.tsx";
+import {useCart} from "@/context/CartContext";
 
 export const Navbar = () => {
-
-    const {user, isAuthenticated} = useAuth();
+    const {user, isAuthenticated, loading} = useAuth();
+    const {totalQuantity, counterCart} = useCart();
 
     return (
         <nav className="border-b-1 border-black sticky flex p-1 sm:p-3 flex-row items-center justify-between z-50">
@@ -22,6 +22,7 @@ export const Navbar = () => {
                         className="w-17 sm:w-20 fill-white mr-1"
                     />
                 </Link>
+
 
                 <div className="hidden sm:flex gap-4 justify-start ml-2">
                     <Link
@@ -94,16 +95,46 @@ export const Navbar = () => {
                     />
                 </Link>
 
-                <ModeToggle/>
+                {/*<ModeToggle/>*/}
 
                 <Link
                     className="text-default-500 cursor-pointer fill-black p-1 box-border"
                     to={"/cart"}
                 >
+                    {counterCart > 0 && (
+                        <span
+                            className="absolute top-1 right-1 bg-black text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                            {counterCart}
+                        </span>
+                    )}
                     <Icons.CartIcon
                         width={24}
                     />
                 </Link>
+
+                <DropdownMenu>
+                    <DropdownMenuTrigger className="sm:hidden p-2">
+                        <Icons.HamburgerIcon className="w-6 h-6 fill-foreground cursor-pointer"/>
+
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="sm:hidden">
+                        <Link to="/"><DropdownMenuItem>Home</DropdownMenuItem></Link>
+
+                        <DropdownMenuItem>
+                            <div className="flex flex-col w-full">
+                                <p className="font-semibold mb-1">Shop</p>
+                                <Link to="/collections/all" className="py-1 text-sm">ALL</Link>
+                                <Link to="/collections/hoodies" className="py-1 text-sm">HOODIES</Link>
+                                <Link to="/collections/tshirts" className="py-1 text-sm">T-SHIRTS</Link>
+                                <Link to="/collections/bottoms" className="py-1 text-sm">BOTTOMS</Link>
+                                <Link to="/collections/accessories" className="py-1 text-sm">ACCESSORIES</Link>
+                            </div>
+                        </DropdownMenuItem>
+
+                        <Link to="/about-us"><DropdownMenuItem>About us</DropdownMenuItem></Link>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
             </div>
 
         </nav>

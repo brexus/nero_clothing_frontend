@@ -6,15 +6,18 @@ import RouterProvider from "@/RouterProvider.tsx";
 import {ThemeProvider} from "@/components/theme-provider.tsx";
 import {Toaster} from "@/components/ui/sonner"
 import {AuthProvider} from "@/context/AuthContext.tsx";
+import { CartProvider } from "@/context/CartContext";
 
 createRoot(document.getElementById('root')!).render(
     <StrictMode>
-        <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
             <AuthProvider>
-                <BrowserRouter>
-                    <RouterProvider/>
-                    <Toaster richColors closeButton/>
-                </BrowserRouter>
+                <CartProvider>
+                    <BrowserRouter>
+                        <RouterProvider/>
+                        <Toaster richColors closeButton/>
+                    </BrowserRouter>
+                </CartProvider>
             </AuthProvider>
         </ThemeProvider>
     </StrictMode>,

@@ -20,10 +20,7 @@ const ProductPage = () => {
     const [productDescription, setProductDescription] = useState("");
     const [productImages, setProductImages] = useState([]);
 
-
-    // const [productImages, setProductImages] = useState([]);
     const [pickedSize, setPickedSize] = useState("");
-
 
     const [isSizeXSAvailable, setIsSizeXSAvailable] = useState(false);
     const [isSizeSAvailable, setIsSizeSAvailable] = useState(false);
@@ -31,13 +28,10 @@ const ProductPage = () => {
     const [isSizeLAvailable, setIsSizeLAvailable] = useState(false);
     const [isSizeXLAvailable, setIsSizeXLAvailable] = useState(false);
 
-
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-
     const {id} = useParams();
-
 
     useEffect(() => {
         setLoading(true);
@@ -130,21 +124,19 @@ const ProductPage = () => {
                 });
 
                 localStorage.setItem("cart", JSON.stringify(cartItems));
-
                 toast("Product added to cart", {type: "success"});
             }
         }
-
         setPickedSize("");
     };
 
     return (
         <DefaultLayout>
             {!loading && !error &&
-                <section className="flex sm:flex-row items-start justify-center flex-col w-full h-full">
+                <section className="flex flex-col md:flex-row w-full min-h-[calc(100vh-180px)]">
                     <div
-                        className="flex flex-col justify-center items-center sm:w-[50%] w-full border-r-1 border-foreground">
-                        <Carousel className={"relative w-full h-full rounded-none"}>
+                        className="flex flex-col justify-start items-center md:w-2/5 w-full border-r-1 border-foreground">
+                        <Carousel className={"relative w-full rounded-none"}>
                             <CarouselContent className={""}>
                                 {productImages.length > 0 &&
                                     productImages.map((image, index) => (
@@ -152,7 +144,6 @@ const ProductPage = () => {
                                             <img
                                                 alt={product.name}
                                                 className="w-full object-contain rounded-none"
-                                                // height={800}
                                                 src={image.imageUrl}
                                             />
 
@@ -167,8 +158,8 @@ const ProductPage = () => {
 
                     </div>
 
-                    <div className="flex flex-col items-start gap-4 p-4 w-full sm:w-[50%]">
-                        <div className="flex flex-col gap-2">
+                    <div className="flex flex-col items-start gap-4 p-6 w-full md:w-3/5">
+                        <div className="flex flex-col gap-2 ">
                             <h1 className=" font-bold text-2xl">{productName}</h1>
                             <ProductPriceText productPrice={productPrice}/>
                         </div>

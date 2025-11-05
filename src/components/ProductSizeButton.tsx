@@ -8,7 +8,6 @@ interface ProductSizeButtonProps {
 }
 
 const ProductSizeButton = ({size, isSizeAvailable, setPickedSize, pickedSize}: ProductSizeButtonProps) => {
-
     return (
         <Button
             size="icon"

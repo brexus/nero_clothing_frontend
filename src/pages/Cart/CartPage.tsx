@@ -12,10 +12,7 @@ import ProductPriceText from "@/components/ProductPriceText.tsx";
 const CartPage = () => {
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
-
     const [checkoutLoading, setCheckoutLoading] = useState(false);
-
-
     const [cartItems, setCartItems] = useState([]);
 
     useEffect(() => {
@@ -28,31 +25,23 @@ const CartPage = () => {
 
     const loadCart = () => {
         const cartItemsLocalStorage = getCartItems();
-
         if (cartItemsLocalStorage.length > 0) {
             setCartItems(cartItemsLocalStorage);
         } else {
             setCartItems([]);
         }
-
         setLoading(false);
     };
 
     const isCartItemsAvailable = async () => {
-
         for (let item of cartItems) {
             let stock = await getStockQuantity(item.productVariantId);
-
-            if (!stock || stock < item.quantity) {
-                return false;
-            }
+            if (!stock || stock < item.quantity) return false;
         }
         return true;
     };
 
-
     const getStockQuantity = async (productVariantId: number) => {
-
         try {
             const response = await fetch(`http://localhost:5000/api/v1/product-variant/${productVariantId}`, {
                 method: 'GET',
@@ -61,17 +50,14 @@ const CartPage = () => {
                 },
             });
 
-
             if (!response.ok) {
                 throw new Error(`Error fetching stock for product variant ${productVariantId}`);
             }
 
             const data = await response.json();
-
             return data.stockQuantity;
 
         } catch (error) {
-            // setError("Failed to check stock availability.");
             console.error("Error fetching stock:", error);
             return false;
         } finally {
@@ -79,10 +65,8 @@ const CartPage = () => {
         }
     };
 
-
     return (
         <DefaultLayout>
-
             {cartItems.length > 0 &&
                 <section
                     className="w-full flex flex-col items-center justify-center text-black h-full py-4"
@@ -91,9 +75,7 @@ const CartPage = () => {
                         CART ({cartItems.reduce((acc, item) => acc + item.quantity, 0)} items)
                     </h1>
 
-
                     <div className={"max-w-xl w-full"}>
-
                         {cartItems.map((item) => (
                             <ProductCartItem
                                 key={item.productVariantId}
@@ -104,23 +86,20 @@ const CartPage = () => {
                         ))}
 
                         <div className="flex flex-col items-center justify-center w-full">
-
                             <p className="text-xl font-semibold flex-row gap-2 flex items-center justify-between w-full">
                                 <span>
                                     Total:
                                 </span>
-
                                 <ProductPriceText
-                                    productPrice={cartItems.reduce((acc, item) => acc + ((item.price) * item.quantity), 0)}/>
+                                    productPrice={cartItems.reduce((acc, item) => acc + ((item.price) * item.quantity), 0)}
+                                />
                             </p>
 
                             <Button
-                                className={" bg-neutral-900 text-background px-6 text-md mt-3 w-full py-6 cursor-pointer mb-4"}
-                                // to={"/checkout"}
+                                className={" bg-neutral-900 text-background px-6 text-md mt-3 w-full py-4 cursor-pointer mb-4"}
                                 onClick={async () => {
                                     setCheckoutLoading(true);
                                     const isCartAvailable = await isCartItemsAvailable();
-
                                     if (isCartAvailable) {
                                         window.location.href = "/checkout";
 
@@ -135,7 +114,6 @@ const CartPage = () => {
                             </Button>
                         </div>
                     </div>
-
                 </section>
             }
 
@@ -146,17 +124,15 @@ const CartPage = () => {
                     <Icons.CartIcon className="opacity-40 w-10"/>
                     <h1 className="text-2xl font-bold">Your Cart is empty</h1>
                     <p className="text-lg">Add products to your cart to continue shopping.</p>
-                    <Link
-                        className={"rounded-full bg-neutral-900 text-background px-4 py-2 text-md mt-2"}
-                        to={"/collections/all"}
-                    >
-                        Continue Shopping
+                    <Link to={"/collections/all"}>
+                        <Button
+                            className={"bg-neutral-900 text-background px-6 text-md mt-3 w-full py-4 cursor-pointer mb-4"}
+                        >
+                            Continue Shopping
+                        </Button>
                     </Link>
-
-
                 </section>
             }
-
         </DefaultLayout>
     );
 };

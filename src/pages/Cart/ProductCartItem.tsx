@@ -38,12 +38,9 @@ const ProductCartItem = ({item, cartItems, setCartItems}: {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
     const [localQuantity, setLocalQuantity] = useState(item.quantity);
     const [availableStock, setAvailableStock] = useState(0);
-
     const [isCheckingStock, setIsCheckingStock] = useState(false);
-
     const [checkStockAvailability, setCheckStockAvailability] = useState(true);
 
 
@@ -182,7 +179,6 @@ const ProductCartItem = ({item, cartItems, setCartItems}: {
 
                     <p>Size: {item.size}</p>
 
-
                     <p className="flex flex-row items-center start gap-1">
                         Total:
                         <ProductPriceText productPrice={item.price * item.quantity}/>
@@ -190,14 +186,12 @@ const ProductCartItem = ({item, cartItems, setCartItems}: {
 
                     <div className={"w-full flex flex-row items-center justify-start gap-2"}>
                         <p className="">Quantity:</p>
-
                         <InputItemQuantity
                             localQuantity={localQuantity}
                             setLocalQuantity={setLocalQuantity}
                             availableStock={availableStock}
                             setCheckStockAvailability={setCheckStockAvailability}
                         />
-
                     </div>
                 </div>
             </div>

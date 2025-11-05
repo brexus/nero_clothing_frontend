@@ -1,4 +1,5 @@
 import {Button} from '@/components/ui/button.tsx';
+import {useCart} from "@/context/CartContext.tsx";
 
 const InputItemQuantity = ({localQuantity, setLocalQuantity, availableStock, setCheckStockAvailability}: {
     localQuantity: number;
@@ -6,6 +7,9 @@ const InputItemQuantity = ({localQuantity, setLocalQuantity, availableStock, set
     availableStock: number;
     setCheckStockAvailability: (validating: boolean) => void;
 }) => {
+
+    const { updateQuantity } = useCart();
+
 
     return (
         <div className="flex flex-row items-center gap-2 border-1 border-black">

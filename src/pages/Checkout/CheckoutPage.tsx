@@ -15,7 +15,6 @@ const CheckoutPage = () => {
     const [totalCost, setTotalCost] = useState(0); // in cents
     const [subtotalCost, setSubtotalCost] = useState(0); // in cents
 
-
     useEffect(() => {
         loadCart();
     }, []);
@@ -41,22 +40,20 @@ const CheckoutPage = () => {
     const calculateTotalCost = () => {
         let calculatedSubtotalCost = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
-        console.log(calculatedSubtotalCost)
         setSubtotalCost(calculatedSubtotalCost);
 
         if (calculatedSubtotalCost > 30000) {
             setShippingCost(0);
+            setTotalCost(calculatedSubtotalCost + 0);
         } else {
             setShippingCost(399);
+            setTotalCost(calculatedSubtotalCost + 399);
         }
-
-        setTotalCost(calculatedSubtotalCost + shippingCost);
     };
 
     return (
         <DefaultLayout>
             <div className={"w-full flex flex-row items-start justify-center h-full px-2 text-sm"}>
-
                 <div
                     className="flex flex-col items-end justify-center border-r-1 border-foreground w-full max-w-xl py-8">
                     <CheckoutForm
@@ -99,7 +96,6 @@ const CheckoutPage = () => {
                                             className={"font-bold"}
                                         />
                                     </div>
-
                                 </div>
                             ))}
                         </>
@@ -107,12 +103,10 @@ const CheckoutPage = () => {
 
                     <div className="flex flex-row items-center justify-between w-full">
                         <p className="">Subtotal</p>
-                        <p className="">
-                            <ProductPriceText
-                                productPrice={subtotalCost}
-                                className={""}
-                            />
-                        </p>
+                        <ProductPriceText
+                            productPrice={subtotalCost}
+                            className={""}
+                        />
                     </div>
 
                     <div className="flex flex-row items-center justify-between w-full">
@@ -125,14 +119,11 @@ const CheckoutPage = () => {
                     {cartItems.length > 0 &&
                         <div className="flex flex-row items-center justify-between w-full text-md font-bold">
                             <p>Total</p>
-                            <p>
-                                <ProductPriceText
-                                    productPrice={totalCost}
-                                />
-                            </p>
+                            <ProductPriceText
+                                productPrice={totalCost}
+                            />
                         </div>
                     }
-
                 </div>
             </div>
         </DefaultLayout>

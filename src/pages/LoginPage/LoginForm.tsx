@@ -2,24 +2,13 @@ import {Form, FormControl, FormField, FormItem, FormMessage,} from "@/components
 import {z} from "zod";
 import {useForm} from "react-hook-form";
 import {zodResolver} from "@hookform/resolvers/zod";
-import {useNavigate} from "react-router";
+import {Link, useNavigate} from "react-router";
 import {Button} from "@/components/ui/button.tsx";
 import {Input} from "@/components/ui/input.tsx";
 import {useAuth} from "@/context/AuthContext.tsx";
 import CircularLoading from "@/components/CircularLoading.tsx";
 import {useState} from "react";
-
-const formSchema = z.object({
-    email: z.string()
-        .min(5, {message: "Email must be at least 5 characters.",})
-        .max(50, {message: "Email must be at most 50 characters.",})
-        .email({message: "Invalid email address.",})
-        .trim(),
-    password: z.string()
-        .min(6, {message: "Password must be at least 6 characters.",})
-        .max(32, {message: "Password must be at most 32 characters.",})
-        .trim(),
-})
+import {loginSchema} from "@/validation/schemas.tsx";
 
 const LoginForm = () => {
     const {login, loading, user} = useAuth();
@@ -28,15 +17,15 @@ const LoginForm = () => {
 
     const navigate = useNavigate();
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const form = useForm<z.infer<typeof loginSchema>>({
+        resolver: zodResolver(loginSchema),
         defaultValues: {
             email: "",
             password: "",
         },
     });
 
-    const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    const onSubmit = async (values: z.infer<typeof loginSchema>) => {
         console.log(values)
 
         try {
@@ -52,16 +41,15 @@ const LoginForm = () => {
             });
 
             if (!response.ok) {
-                // const errorData = await response.json();
-                // throw new Error(errorData.message || 'Something went wrong');
+
             }
 
-            login(values.email, values.password);
+            await login(values.email, values.password);
             navigate("/profile");
 
         } catch (err: any) {
             console.log(JSON.stringify(err));
-            // setError(err);
+            setError(err.message);
         } finally {
             // setLoading(false);
         }
@@ -69,7 +57,7 @@ const LoginForm = () => {
 
     return (
         <Form {...form} >
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 w-full px-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full px-8">
 
                 <h2 className="text-2xl font-bold">Login</h2>
 
@@ -79,9 +67,14 @@ const LoginForm = () => {
                     render={({field}) => (
                         <FormItem>
                             <FormControl>
-                                <Input placeholder="E-mail" {...field} />
+                                <Input
+                                    placeholder="E-mail"
+                                    {...field}
+                                    autoComplete="email"
+                                    className={error && "border-destructive"}
+                                />
                             </FormControl>
-                            <FormMessage/>
+                            <FormMessage />
                         </FormItem>
                     )}
                 />
@@ -92,7 +85,13 @@ const LoginForm = () => {
                     render={({field}) => (
                         <FormItem>
                             <FormControl>
-                                <Input type="password" placeholder="Password" {...field} />
+                                <Input
+                                    type="password"
+                                    placeholder="Password"
+                                    {...field}
+                                    autoComplete="new-password"
+                                    className={error && "border-destructive"}
+                                />
                             </FormControl>
                             <FormMessage>
                             </FormMessage>
@@ -100,13 +99,22 @@ const LoginForm = () => {
                     )}
                 />
 
+                <p className="text-red-600 text-sm">
+                    {error}
+                </p>
+
+                <p className={"text-sm text-gray-600"}>
+                    Do not have an account? {" "}
+                    <Link to="/register" className="text-blue-500 font-bold no-underline ">Register</Link>
+                </p>
+
                 <Button
                     type="submit"
-                    className={"w-full py-6 cursor-pointer"}
+                    className={"w-full py-4 cursor-pointer"}
                     disabled={loading}
                 >
                     <CircularLoading className={`${loading ? "block animate-spin" : "hidden"}`}/>
-                    Submit
+                    Login
                 </Button>
             </form>
         </Form>

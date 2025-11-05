@@ -8,16 +8,20 @@ import NotFoundPage from "@/pages/NotFoundPage.tsx";
 import CheckoutPage from "@/pages/Checkout/CheckoutPage.tsx";
 import LoginPage from "@/pages/LoginPage/LoginPage.tsx";
 import ProfilePage from "@/pages/Profile/ProfilePage.tsx";
+import AboutUsPage from "@/pages/AboutUsPage.tsx";
+import RegisterPage from "@/pages/RegisterPage/RegisterPage.tsx";
 
 const RouterProvider = () => {
     return (
         <Routes>
             <Route element={<HomePage/>} path="/"/>
+            <Route element={<AboutUsPage/>} path="/about-us"/>
             <Route element={<ProductPage/>} path="/product/:id"/>
             <Route element={<CollectionPage/>} path="/collections/:name"/>
             <Route element={<CartPage/>} path="/cart"/>
             <Route element={<CheckoutPage/>} path="/checkout"/>
 
+            <Route element={<RegisterPage/>} path="/register"/>
             <Route element={<LoginPage/>} path="/login"/>
             <Route element={<ProfilePage/>} path="/profile"/>
 

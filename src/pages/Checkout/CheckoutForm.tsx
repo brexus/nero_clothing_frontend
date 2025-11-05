@@ -5,86 +5,53 @@ import {Input} from "@/components/ui/input.tsx";
 import {Checkbox} from "@/components/ui/checkbox.tsx";
 import {Button} from "@/components/ui/button.tsx";
 import {Form, FormControl, FormField, FormItem, FormLabel, FormMessage,} from "@/components/ui/form.tsx"
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
 import {useNavigate} from "react-router";
 import {toast} from "sonner";
 import ProductPriceText from "@/components/ProductPriceText.tsx";
-
-
-const formSchema = z.object({
-    email: z.string()
-        .min(2, {message: "Email must be at least 2 characters.",})
-        .trim()
-        .email({message: "Invalid email address.",}),
-
-    phoneNumber: z.preprocess(
-        (val) => typeof val === "string" ? val.replace(/\s+/g, "") : val,
-        z.string()
-            .min(9, {message: "Phone number must be at least 9 digits."})
-            .regex(/^\+?[0-9]{9,15}$/, {message: "Invalid phone number format."})
-    ),
-
-    firstName: z.string().min(2, {
-        message: "First name must be at least 2 characters.",
-    }),
-    lastName: z.string().min(2, {
-        message: "Last name must be at least 2 characters.",
-    }),
-
-    paymentMethod: z.string().min(2, {
-        message: "Payment method must be at least 2 characters.",
-    }),
-    building: z.string().min(1, {
-        message: "Building number must be at least 1.",
-    }),
-    street: z.string().min(2, {
-        message: "Street must be at least 2 characters.",
-    }),
-    apartment: z.string(),
-    zipCode: z.string().min(2, {
-        message: "Zip code must be at least 2 characters.",
-    }),
-    city: z.string().min(2, {
-        message: "City must be at least 2 characters.",
-    }),
-    country: z.string().min(2, {
-        message: "Country must be at least 2 characters.",
-    }),
-    terms: z.boolean().refine((val) => val === true, {
-        message: "You must accept the terms and conditions.",
-    }),
-
-})
+import {useAuth} from "@/context/AuthContext.tsx";
+import {orderSchema} from "@/validation/schemas.tsx";
 
 const CheckoutForm = ({cartItems, shippingCost}) => {
-
-    const [areTermsAccepted, setAreTermsAccepted] = useState(false);
+    const [countries, setCountries] = useState(null);
 
     const navigation = useNavigate();
 
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
+    const {token, user, isAuthenticated} = useAuth();
+    useEffect(() => {
+        fetchCountries();
+    }, []);
+
+    useEffect(() => {
+        if (user && isAuthenticated) {
+            form.setValue("firstName", user.firstName ?? "");
+            form.setValue("lastName", user.lastName ?? "");
+            form.setValue("email", user.email ?? "");
+        }
+    }, [user, isAuthenticated]);
+
+    const schema = orderSchema(!!isAuthenticated);
+
+    const form = useForm<z.infer<typeof schema>>({
+        resolver: zodResolver(schema),
         defaultValues: {
             email: "",
             firstName: "",
             lastName: "",
             phoneNumber: "",
             paymentMethod: "",
-
             street: "",
             building: "",
             apartment: "",
             zipCode: "",
             city: "",
-            country: "",
-
+            country: "Poland",
             terms: false,
         },
     });
 
-    const onSubmit = async (values: z.infer<typeof formSchema>) => {
-
+    const onSubmit = async (values: z.infer<typeof registerSchema>) => {
         console.log(values)
 
         let newItems = [];
@@ -96,19 +63,25 @@ const CheckoutForm = ({cartItems, shippingCost}) => {
         });
         console.log(newItems);
 
+        const headers: Record<string, string> = {
+            'Content-Type': 'application/json',
+        };
+
+        if (isAuthenticated && token) {
+            headers['Authorization'] = `Bearer ${token}`;
+            console.log("Added auth header");
+        }
 
         try {
-            const response = await fetch(`http://localhost:5000/api/v1/order/`, {
+            const response = await fetch(`http://localhost:5000/api/v1/order/${isAuthenticated ? "auth" : "guest"}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers,
                 body: JSON.stringify({
                     paymentMethod: values.paymentMethod,
                     firstName: values.firstName,
                     lastName: values.lastName,
                     phoneNumber: values.phoneNumber.trim(),
-                    email: values.email,
+                    email: isAuthenticated ? user.email : values.email.trim(),
                     shippingAddress: {
                         street: values.street,
                         building: values.building,
@@ -141,23 +114,61 @@ const CheckoutForm = ({cartItems, shippingCost}) => {
         }
     }
 
+
+    const fetchCountries = async () => {
+        const response = await fetch(`https://restcountries.com/v3.1/region/europe?fields=name`, {
+            method: 'GET',
+        });
+
+        if (!response.ok) {
+            throw new Error('Błąd pobierania produktu');
+        }
+
+        const data = await response.json();
+        const names = data.map(c => c.name.common).sort();
+        setCountries(names);
+    }
+
     return (
         <Form {...form} >
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 w-full px-8">
+                {!isAuthenticated && (
+                    <p className={"text-sm text-gray-600"}>
+                        You are placing an order as a guest. We recommend{' '}
+                        <a href="/login" className="text-blue-600 underline">
+                            logging in.
+                        </a>{' '}
+                    </p>
+                )}
+
                 <h2 className="text-2xl font-bold">Contact</h2>
 
-                <FormField
-                    control={form.control}
-                    name="email"
-                    render={({field}) => (
-                        <FormItem>
-                            <FormControl>
-                                <Input placeholder="E-mail" {...field} />
-                            </FormControl>
-                            <FormMessage/>
-                        </FormItem>
-                    )}
-                />
+                {!isAuthenticated && (
+                    <FormField
+                        control={form.control}
+                        name="email"
+                        render={({field}) => (
+                            <FormItem>
+                                <FormControl>
+                                    <Input
+                                        placeholder="E-mail"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormMessage/>
+                            </FormItem>
+                        )}
+                    />
+                )}
+
+                {isAuthenticated && (
+                    <Input
+                        className={isAuthenticated ? "" : "bg-gray-400 cursor-not-allowed"}
+                        disabled={isAuthenticated}
+                        placeholder={isAuthenticated ? ((user != null) ? user.email : "") : "E-mail"}
+                    />
+
+                )}
 
                 <FormField
                     control={form.control}
@@ -175,13 +186,32 @@ const CheckoutForm = ({cartItems, shippingCost}) => {
 
                 <h2 className="text-2xl font-bold ">Delivery</h2>
 
+                {/* napisz po angielsku że dostawy są tylko na terytorium europy*/}
+                <p className={"text-sm text-gray-600"}>
+                    We currently only deliver within Europe.
+                </p>
+
                 <FormField
                     control={form.control}
                     name="country"
                     render={({field}) => (
                         <FormItem>
                             <FormControl>
-                                <Input placeholder="Country" {...field} />
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select payment method"/>
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        {countries && countries.map((country) => (
+                                            <SelectItem value={country} key={country}>
+                                                {country}
+                                            </SelectItem>
+                                        ))}
+
+                                    </SelectContent>
+                                </Select>
                             </FormControl>
                             <FormMessage/>
                         </FormItem>
@@ -250,7 +280,7 @@ const CheckoutForm = ({cartItems, shippingCost}) => {
                     render={({field}) => (
                         <FormItem>
                             <FormControl>
-                                <Input placeholder="Apartment" {...field} />
+                                <Input placeholder="Apartment (Optional)" {...field} />
                             </FormControl>
                             <FormMessage/>
                         </FormItem>
@@ -292,7 +322,6 @@ const CheckoutForm = ({cartItems, shippingCost}) => {
                     name="paymentMethod"
                     render={({field}) => (
                         <FormItem>
-                            {/*<FormLabel>Payment method</FormLabel>*/}
                             <Select onValueChange={field.onChange} defaultValue={field.value}>
                                 <FormControl>
                                     <SelectTrigger>
@@ -327,15 +356,19 @@ const CheckoutForm = ({cartItems, shippingCost}) => {
 
                 <h2 className="text-2xl font-bold">Shipping method</h2>
                 <div className={""}>
-                    <p className={"mb-2 flex flex-row gap-1"}>
-                        Shipping cost:
+                    <div className={"flex flex-row items-center justify-start gap-2 mb-2"}>
+                        <p className={"flex flex-row gap-1"}>
+                            Shipping cost:
+                        </p>
                         <ProductPriceText
                             productPrice={shippingCost}
                             className={"font-bold"}
                         />
-                    </p>
+                    </div>
 
-                    <p className={"text-sm text-gray-600"}>All orders over $300 qualify for free shipping.</p>
+                    <p className={"text-sm text-gray-600"}>
+                        All orders over $300 qualify for free shipping.
+                    </p>
                 </div>
 
                 <h2 className="text-2xl font-bold">Terms and conditions</h2>

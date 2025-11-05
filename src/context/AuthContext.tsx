@@ -33,7 +33,7 @@ export const AuthProvider = ({children}) => {
                 body: JSON.stringify({email, password})
             });
 
-            if (!res.ok) throw new Error("Błędny login lub hasło");
+            if (!res.ok) throw new Error("Invalid email or password.");
 
             const data = await res.json();
             localStorage.setItem("token", data.token);
@@ -67,6 +67,7 @@ export const AuthProvider = ({children}) => {
             if (!res.ok) throw new Error("Błąd autoryzacji");
 
             const data = await res.json();
+            console.log("Fetched user data:", data);
             setUser(data);
 
         } catch (error) {

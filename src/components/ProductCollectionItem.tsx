@@ -35,7 +35,6 @@ const ProductCollectionItem = ({product}: { product: Product }) => {
             }
 
             const data = await response.json();
-
             setImage(data[0].imageUrl);
 
         } catch (err: any) {
@@ -52,7 +51,7 @@ const ProductCollectionItem = ({product}: { product: Product }) => {
         >
             <img
                 alt={product.name}
-                src={image}
+                src={image || undefined}
                 onLoad={() => setLoaded(true)}
                 className={`rounded-none flex items-center justify-center object-contain w-full h-[500px] transition-opacity duration-100 ${loaded ? "opacity-100" : "opacity-0"}`}
             />

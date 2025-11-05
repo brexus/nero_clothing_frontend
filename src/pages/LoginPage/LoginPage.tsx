@@ -5,12 +5,9 @@ import LoginForm from "@/pages/LoginPage/LoginForm.tsx";
 
 const LoginPage = () => {
     const {isAuthenticated} = useAuth();
-
     const navigate = useNavigate();
 
-    if (isAuthenticated) {
-        navigate("/profile");
-    }
+    if (isAuthenticated) navigate("/profile");
 
     return (
         <DefaultLayout>
@@ -19,7 +16,6 @@ const LoginPage = () => {
                     <LoginForm/>
                 </div>
             </div>
-
         </DefaultLayout>
     );
 };
